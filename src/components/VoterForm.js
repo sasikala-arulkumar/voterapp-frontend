@@ -1,6 +1,8 @@
 
 import React, { useState, useRef } from "react";
 import Webcam from "react-webcam";
+import { saveVoter } from "../api/axiosConfig.js";  // correct relative path
+
 import "./VoterForm.css";
 
 const VoterForm = ({ voters = [], setVoters = () => {} }) => {
