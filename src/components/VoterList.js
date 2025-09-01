@@ -340,9 +340,6 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
   const webcamRef = useRef(null);
 
   useEffect(() => {
-    fetchVoters();
-  }, [fetchVoters]);
-
   const fetchVoters = async () => {
     try {
       const res = await axiosInstance.get("/"); // ✅ API call
@@ -351,6 +348,10 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
       console.error("Error fetching voters:", err);
     }
   };
+
+  fetchVoters();
+}, [setVoters]); // 👈 dependency is stable
+
 
   // Voice input for edit modal
   const startVoiceRecognition = (fieldName) => {
