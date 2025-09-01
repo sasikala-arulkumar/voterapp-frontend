@@ -341,7 +341,7 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
 
   useEffect(() => {
     fetchVoters();
-  }, []);
+  }, [fetchVoters]);
 
   const fetchVoters = async () => {
     try {
