@@ -1,11 +1,8 @@
 import axios from "axios";
 
-
 const axiosInstance = axios.create({
-  baseURL:"https://sasikalaarul-voterapp.onrender.com/api/voters", // change to your backend URL
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // baseURL: "http://localhost:5000/api/voters", // match backend
+  baseURL:"https://voterapp-backend-uqqb.onrender.com",
 });
 
 export default axiosInstance;

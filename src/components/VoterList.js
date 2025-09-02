@@ -1,6 +1,5 @@
-// import React, { useState, useRef,useEffect } from "react";
-// import axios from "axios"; 
-// import axiosInstance from "../api/axiosConfig.js"; // path from component
+// import React, { useState, useRef, useEffect } from "react";
+// import axiosInstance from "../api/axiosConfig"; // axios instance
 // import Webcam from "react-webcam";
 // import "./VoterList.css";
 
@@ -14,20 +13,79 @@
 //   const [editedVoter, setEditedVoter] = useState({});
 //   const webcamRef = useRef(null);
 
+//   // Fetch voters on load
 //   useEffect(() => {
+//     const fetchVoters = async () => {
+//       try {
+//         const res = await axiosInstance.get("/");
+//         setVoters(res.data);
+//       } catch (err) {
+//         console.error("Error fetching voters:", err);
+//       }
+//     };
+
 //     fetchVoters();
-//   }, []);
+//   }, [setVoters]);
 
-//   const fetchVoters = async () => {
+//   // Delete voter from DB
+//   const deleteVoter = async (id) => {
 //     try {
-//       // const res = await axios.get("http://localhost:5000/api/voters");
-//       const res = await axios.get("https://sasikalaarul-voterapp.onrender.com");
-
-//       setVoters(res.data);  // ✅ update state with MongoDB data
+//       await axiosInstance.delete(`/${id}`);
+//       setVoters((prev) => prev.filter((v) => v._id !== id));
 //     } catch (err) {
-//       console.error("Error fetching voters:", err);
+//       console.error("Error deleting voter:", err);
 //     }
 //   };
+
+//   // Edit voter locally
+//   const handleEditVoter = (index) => {
+//     setEditingIndex(index);
+//     setEditedVoter({ ...filteredVoters[index] });
+//   };
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setEditedVoter({ ...editedVoter, [name]: value });
+//   };
+
+//   // Save edited voter to DB
+//   const saveEditedVoter = async () => {
+//     try {
+//       const res = await axiosInstance.put(`/${editedVoter._id}`, editedVoter);
+//       setVoters((prev) =>
+//         prev.map((v) => (v._id === res.data._id ? res.data : v))
+//       );
+//       setEditingIndex(null);
+//     } catch (err) {
+//       console.error("Error updating voter:", err);
+//     }
+//   };
+
+//   const cancelEdit = () => setEditingIndex(null);
+
+//   // Capture photo
+//   const capturePhoto = () => {
+//     const imageSrc = webcamRef.current.getScreenshot();
+//     setEditedVoter({ ...editedVoter, photo: imageSrc });
+//   };
+
+//   // Filter voters
+//   const filteredVoters = voters.filter((voter) => {
+//     const matchesFamily =
+//       (voter.familyHead || "")
+//         .toLowerCase()
+//         .includes(searchFamily.toLowerCase());
+//     const matchesGender = genderFilter
+//       ? (voter.gender || "").toLowerCase() === genderFilter.toLowerCase()
+//       : true;
+//     const matchesDisability = disabilityFilter
+//       ? (voter.disability || "").toLowerCase() === disabilityFilter.toLowerCase()
+//       : true;
+//     const matchesArea = areaFilter
+//       ? (voter.area || "").toLowerCase().includes(areaFilter.toLowerCase().trim())
+//       : true;
+//     return matchesFamily && matchesGender && matchesDisability && matchesArea;
+//   });
 
 //   // Voice input for edit modal
 //   const startVoiceRecognition = (fieldName) => {
@@ -57,56 +115,7 @@
 //     };
 //   };
 
-//   // Filter voters
-//   const filteredVoters = voters.filter((voter) => {
-//     const matchesFamily =
-//       (voter.familyHead || "")
-//         .toLowerCase()
-//         .includes(searchFamily.toLowerCase());
-//     const matchesGender = genderFilter
-//       ? (voter.gender || "").toLowerCase() === genderFilter.toLowerCase()
-//       : true;
-//     const matchesDisability = disabilityFilter
-//       ? (voter.disability || "").toLowerCase() === disabilityFilter.toLowerCase()
-//       : true;
-//     const matchesArea = areaFilter
-//       ? (voter.area || "").toLowerCase().includes(areaFilter.toLowerCase().trim())
-//       : true;
-//     return matchesFamily && matchesGender && matchesDisability && matchesArea;
-//   });
-
-//   const deleteVoter = (index) => {
-//     const updated = [...voters];
-//     updated.splice(index, 1);
-//     setVoters(updated);
-//   };
-
-//   const handleEditVoter = (index) => {
-//     setEditingIndex(index);
-//     setEditedVoter({ ...filteredVoters[index] });
-//   };
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setEditedVoter({ ...editedVoter, [name]: value });
-//   };
-
-//   const saveEditedVoter = () => {
-//     const updated = [...voters];
-//     const originalIndex = voters.indexOf(filteredVoters[editingIndex]);
-//     updated[originalIndex] = editedVoter;
-//     setVoters(updated);
-//     setEditingIndex(null);
-//   };
-
-//   const cancelEdit = () => setEditingIndex(null);
-
-//   // Capture photo in edit modal
-//   const capturePhoto = () => {
-//     const imageSrc = webcamRef.current.getScreenshot();
-//     setEditedVoter({ ...editedVoter, photo: imageSrc });
-//   };
-
+//   // Render edit inputs
 //   const renderEditInput = (label, name, type = "text", options = [], voice = true) => {
 //     if (type === "select") {
 //       return (
@@ -180,6 +189,7 @@
 //       </h3>
 
 //       {filteredVoters.length > 0 ? (
+//         <div className="table-container">
 //         <table>
 //           <thead>
 //             <tr>
@@ -204,7 +214,7 @@
 //           </thead>
 //           <tbody>
 //             {filteredVoters.map((voter, index) => (
-//               <tr key={index}>
+//               <tr key={voter._id}>
 //                 <td>{voter.sno}</td>
 //                 <td>{voter.voterName}</td>
 //                 <td>{voter.familyHead}</td>
@@ -221,16 +231,17 @@
 //                 <td>{voter.voterId}</td>
 //                 <td>{voter.rationCardNo}</td>
 //                 <td>
-//                   {voter.photo && <img src={voter.photo} alt="photo" width={50} />}
+//                   {voter.photo && <img src={voter.photo} alt="voter profile" width={50} />}
 //                 </td>
 //                 <td>
 //                   <button onClick={() => handleEditVoter(index)}>Edit</button>
-//                   <button onClick={() => deleteVoter(index)}>Delete</button>
+//                   <button onClick={() => deleteVoter(voter._id)}>Delete</button>
 //                 </td>
 //               </tr>
 //             ))}
 //           </tbody>
 //         </table>
+//         </div>
 //       ) : (
 //         <p>No voters found</p>
 //       )}
@@ -299,7 +310,6 @@
 //               {editedVoter.photo && (
 //                 <div>
 //                   <img src={editedVoter.photo} alt="" width={100} />
-
 //                   <button
 //                     type="button"
 //                     onClick={() => setEditedVoter({ ...editedVoter, photo: null })}
@@ -325,7 +335,7 @@
 
 // export default VoterList;
 import React, { useState, useRef, useEffect } from "react";
-import axiosInstance from "../api/axiosConfig"; // ✅ use axiosInstance
+import axiosInstance from "../api/axiosConfig"; // axios instance
 import Webcam from "react-webcam";
 import "./VoterList.css";
 
@@ -339,19 +349,81 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
   const [editedVoter, setEditedVoter] = useState({});
   const webcamRef = useRef(null);
 
+  // Fetch voters on load
   useEffect(() => {
-  const fetchVoters = async () => {
+    const fetchVoters = async () => {
+      try {
+        const res = await axiosInstance.get("/");
+        setVoters(res.data);
+      } catch (err) {
+        console.error("Error fetching voters:", err);
+      }
+    };
+    fetchVoters();
+  }, [setVoters]);
+
+  // Delete voter from DB
+  const deleteVoter = async (id) => {
     try {
-      const res = await axiosInstance.get("/"); // ✅ API call
-      setVoters(res.data);
+      await axiosInstance.delete(`/${id}`);
+      setVoters((prev) => prev.filter((v) => v._id !== id));
     } catch (err) {
-      console.error("Error fetching voters:", err);
+      console.error("Error deleting voter:", err);
     }
   };
 
-  fetchVoters();
-}, [setVoters]); // 👈 dependency is stable
+  // Edit voter locally
+  const handleEditVoter = (index) => {
+    setEditingIndex(index);
+    setEditedVoter({ ...filteredVoters[index] });
+  };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditedVoter({ ...editedVoter, [name]: value });
+  };
+
+  // Save edited voter to DB
+  const saveEditedVoter = async () => {
+    try {
+      const res = await axiosInstance.put(`/${editedVoter._id}`, editedVoter);
+      setVoters((prev) =>
+        prev.map((v) => (v._id === res.data._id ? res.data : v))
+      );
+      setEditingIndex(null);
+    } catch (err) {
+      console.error("Error updating voter:", err);
+    }
+  };
+
+  const cancelEdit = () => setEditingIndex(null);
+
+  // Capture photo
+  const capturePhoto = () => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    setEditedVoter({ ...editedVoter, photo: imageSrc });
+  };
+
+  // Filter voters
+  const filteredVoters = voters.filter((voter) => {
+    const matchesFamily =
+      (voter.familyHead || "")
+        .toLowerCase()
+        .includes(searchFamily.toLowerCase());
+    const matchesGender = genderFilter
+      ? (voter.gender || "").toLowerCase() === genderFilter.toLowerCase()
+      : true;
+    const matchesDisability = disabilityFilter
+      ? (voter.disability || "").toLowerCase() ===
+        disabilityFilter.toLowerCase()
+      : true;
+    const matchesArea = areaFilter
+      ? (voter.area || "")
+          .toLowerCase()
+          .includes(areaFilter.toLowerCase().trim())
+      : true;
+    return matchesFamily && matchesGender && matchesDisability && matchesArea;
+  });
 
   // Voice input for edit modal
   const startVoiceRecognition = (fieldName) => {
@@ -381,62 +453,23 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
     };
   };
 
-  // Filter voters
-  const filteredVoters = voters.filter((voter) => {
-    const matchesFamily =
-      (voter.familyHead || "")
-        .toLowerCase()
-        .includes(searchFamily.toLowerCase());
-    const matchesGender = genderFilter
-      ? (voter.gender || "").toLowerCase() === genderFilter.toLowerCase()
-      : true;
-    const matchesDisability = disabilityFilter
-      ? (voter.disability || "").toLowerCase() === disabilityFilter.toLowerCase()
-      : true;
-    const matchesArea = areaFilter
-      ? (voter.area || "").toLowerCase().includes(areaFilter.toLowerCase().trim())
-      : true;
-    return matchesFamily && matchesGender && matchesDisability && matchesArea;
-  });
-
-  const deleteVoter = (index) => {
-    const updated = [...voters];
-    updated.splice(index, 1);
-    setVoters(updated);
-  };
-
-  const handleEditVoter = (index) => {
-    setEditingIndex(index);
-    setEditedVoter({ ...filteredVoters[index] });
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditedVoter({ ...editedVoter, [name]: value });
-  };
-
-  const saveEditedVoter = () => {
-    const updated = [...voters];
-    const originalIndex = voters.indexOf(filteredVoters[editingIndex]);
-    updated[originalIndex] = editedVoter;
-    setVoters(updated);
-    setEditingIndex(null);
-  };
-
-  const cancelEdit = () => setEditingIndex(null);
-
-  // Capture photo in edit modal
-  const capturePhoto = () => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setEditedVoter({ ...editedVoter, photo: imageSrc });
-  };
-
-  const renderEditInput = (label, name, type = "text", options = [], voice = true) => {
+  // Render edit inputs
+  const renderEditInput = (
+    label,
+    name,
+    type = "text",
+    options = [],
+    voice = true
+  ) => {
     if (type === "select") {
       return (
         <label>
           {label}:
-          <select name={name} value={editedVoter[name] || ""} onChange={handleChange}>
+          <select
+            name={name}
+            value={editedVoter[name] || ""}
+            onChange={handleChange}
+          >
             <option value="">-- Select --</option>
             {options.map((opt) => (
               <option key={opt} value={opt}>
@@ -483,7 +516,10 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
           value={areaFilter}
           onChange={(e) => setAreaFilter(e.target.value)}
         />
-        <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
+        <select
+          value={genderFilter}
+          onChange={(e) => setGenderFilter(e.target.value)}
+        >
           <option value="">All Genders</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
@@ -504,57 +540,63 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
       </h3>
 
       {filteredVoters.length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Voter’s Name</th>
-              <th>Family Head</th>
-              <th>Wife’s Name</th>
-              <th>Age</th>
-              <th>Gender</th>
-              <th>Disability</th>
-              <th>Aadhaar Number</th>
-              <th>Phone Number</th>
-              <th>Marital Status</th>
-              <th>Work</th>
-              <th>Area</th>
-              <th>Address</th>
-              <th>Voter ID</th>
-              <th>Ration Card No</th>
-              <th>Photo</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredVoters.map((voter, index) => (
-              <tr key={index}>
-                <td>{voter.sno}</td>
-                <td>{voter.voterName}</td>
-                <td>{voter.familyHead}</td>
-                <td>{voter.wifeName}</td>
-                <td>{voter.age}</td>
-                <td>{voter.gender}</td>
-                <td>{voter.disability}</td>
-                <td>{voter.aadhaarNumber}</td>
-                <td>{voter.phoneNumber}</td>
-                <td>{voter.maritalStatus}</td>
-                <td>{voter.work}</td>
-                <td>{voter.area}</td>
-                <td>{voter.address}</td>
-                <td>{voter.voterId}</td>
-                <td>{voter.rationCardNo}</td>
-                <td>
-                  {voter.photo && <img src={voter.photo} alt="photo" width={50} />}
-                </td>
-                <td>
-                  <button onClick={() => handleEditVoter(index)}>Edit</button>
-                  <button onClick={() => deleteVoter(index)}>Delete</button>
-                </td>
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Voter’s Name</th>
+                <th>Family Head</th>
+                <th>Wife’s Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Disability</th>
+                <th>Aadhaar Number</th>
+                <th>Phone Number</th>
+                <th>Marital Status</th>
+                <th>Work</th>
+                <th>Area</th>
+                <th>Address</th>
+                <th>Voter ID</th>
+                <th>Ration Card No</th>
+                <th>Photo</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredVoters.map((voter, index) => (
+                <tr key={voter._id}>
+                  <td data-label="S.No">{voter.sno}</td>
+                  <td data-label="Voter’s Name">{voter.voterName}</td>
+                  <td data-label="Family Head">{voter.familyHead}</td>
+                  <td data-label="Wife’s Name">{voter.wifeName}</td>
+                  <td data-label="Age">{voter.age}</td>
+                  <td data-label="Gender">{voter.gender}</td>
+                  <td data-label="Disability">{voter.disability}</td>
+                  <td data-label="Aadhaar Number">{voter.aadhaarNumber}</td>
+                  <td data-label="Phone Number">{voter.phoneNumber}</td>
+                  <td data-label="Marital Status">{voter.maritalStatus}</td>
+                  <td data-label="Work">{voter.work}</td>
+                  <td data-label="Area">{voter.area}</td>
+                  <td data-label="Address">{voter.address}</td>
+                  <td data-label="Voter ID">{voter.voterId}</td>
+                  <td data-label="Ration Card No">{voter.rationCardNo}</td>
+                  <td data-label="Photo">
+                    {voter.photo && (
+                      <img src={voter.photo} alt="voter profile" width={50} />
+                    )}
+                  </td>
+                  <td data-label="Action">
+                    <button onClick={() => handleEditVoter(index)}>Edit</button>
+                    <button onClick={() => deleteVoter(voter._id)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p>No voters found</p>
       )}
@@ -596,7 +638,10 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
                     if (file) {
                       const reader = new FileReader();
                       reader.onloadend = () =>
-                        setEditedVoter({ ...editedVoter, photo: reader.result });
+                        setEditedVoter({
+                          ...editedVoter,
+                          photo: reader.result,
+                        });
                       reader.readAsDataURL(file);
                     }
                   }}
@@ -625,7 +670,9 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
                   <img src={editedVoter.photo} alt="" width={100} />
                   <button
                     type="button"
-                    onClick={() => setEditedVoter({ ...editedVoter, photo: null })}
+                    onClick={() =>
+                      setEditedVoter({ ...editedVoter, photo: null })
+                    }
                   >
                     Retake / Remove
                   </button>
