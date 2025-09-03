@@ -1,22 +1,21 @@
-name: Build and Deploy to Firebase Hosting
+name: build_and_deploy
 
 on:
   push:
     branches:
-      - main # Change if your default branch is different
+      - main
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      # Install Node.js 20
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 18 # Use same version as in your local dev if possible
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
@@ -30,5 +29,4 @@ jobs:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
           channelId: live
-          projectId: voterapp-c47d7 # <-- Replace with your Firebase project ID
-
+          projectId: voterapp-c47d7
