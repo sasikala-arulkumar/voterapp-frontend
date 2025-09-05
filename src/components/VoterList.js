@@ -353,7 +353,7 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
   useEffect(() => {
     const fetchVoters = async () => {
       try {
-        const res = await axiosInstance.get("/");
+        const res = await axiosInstance.get("/api/voters");
         setVoters(res.data);
       } catch (err) {
         console.error("Error fetching voters:", err);
@@ -365,7 +365,7 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
   // Delete voter from DB
   const deleteVoter = async (id) => {
     try {
-      await axiosInstance.delete(`/${id}`);
+      await axiosInstance.delete(`/api/voters/${id}`);
       setVoters((prev) => prev.filter((v) => v._id !== id));
     } catch (err) {
       console.error("Error deleting voter:", err);
@@ -386,7 +386,7 @@ const VoterList = ({ voters = [], setVoters = () => {} }) => {
   // Save edited voter to DB
   const saveEditedVoter = async () => {
     try {
-      const res = await axiosInstance.put(`/${editedVoter._id}`, editedVoter);
+      const res = await axiosInstance.put(`/api/voters/${editedVoter._id}`, editedVoter);
       setVoters((prev) =>
         prev.map((v) => (v._id === res.data._id ? res.data : v))
       );

@@ -80,7 +80,7 @@ const VoterForm = ({ voters = [], setVoters = () => {} }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axiosInstance.post("", formData); // ✅ API call
+      const res = await axiosInstance.post("/api/voters", formData); // ✅ API call
       setVoters([...voters, res.data]);
       alert("✅ Voter saved successfully!");
 
